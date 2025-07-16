@@ -24,7 +24,7 @@ jobs:
 
       - name: Copy JAR to root for Docker
         run: |
-             cp spring-petclinic/spring-petclinic/target/spring-petclinic-3.3.0-SNAPSHOT.jar springpetclinic.jar
+             cp /home/runner/work/spring-petclinic/spring-petclinic/target/spring-petclinic-3.3.0-SNAPSHOT.jar springpetclinic.jar
         
       - name: Build docker image
         run: docker image build -t spring .
