@@ -21,3 +21,10 @@ jobs:
 
       - name: Package project
         run: mvn package
+
+
+
+
+
+
+
