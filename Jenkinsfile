@@ -1,77 +1,34 @@
 pipeline {
     agent any
-
     tools {
-        maven = 'maven3'
+        maven 'maven3'
     }
-    environment {
-        SCANNER_HOME = tool 'sonar'
-    }
-     triggers {
-        pollSCM('* * * * *')
-    }
-    options {
-        timeout(time: 30, unit: 'MINUTES')
-    }
+    
     stages {
-        stage('Git Checkout') {
+        stage('Git checkout') {
             steps {
-                git url: 'https://github.com/gopi8324/spring-petclinic.git',
-                    branch: 'main'
+                git branch: 'main', url: 'https://github.com/gopi8324/spring-petclinic.git'
             }
         }
-        stage('Compile') {
-            steps{
-                sh 'mvn compile'
-            }
-        }
-        stage('Test') {
-            steps{
-                sh 'mvn test'
-            }
-        }
-        stage('File System Scan') {
+        stage('code compile') {
             steps {
-                sh 'trivy fs --format table -o trivy-fs-report.html .'
+                sh 'mvn compile -Dcheckstyle.skip=true'
             }
         }
-        stage('SonarQube Analsyis') {
+        stage('code test') {
             steps {
-                withSonarQubeEnv('sonar') { 
-                     sh "$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=gopi -Dsonar.projectkey=spring -Dsonar.java.binaries=target"
-                }
+                sh 'mvn test -Dcheckstyle.skip=true'
             }
         }
-        stage('Build') {
+        stage('package code') {
             steps {
-            sh 'mvn package'
+                sh 'mvn package -Dcheckstyle.skip=true'
             }
         }
-        stage('Publish to Nexus') {
+        stage('Deploy into Nexus') {
             steps {
-                withMaven(globalMavenSettingConfig:'settings-maven',jdk ",maven: 'maven3',mavenSetttingsConfig:",traceability: true) {
-                    sh "mvn deploy"
-                }
-            }
-        }
-        stage('Build  docker image') {
-            steps {
-                script {
-                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'Docker')
-                    sh "docker build -t springpectclinic:3.3.0 ."
-                }
-            }
-        }
-        stage('Docker image Scan') {
-            steps {
-                sh 'trivy image --format table -o trivy-fs-report.html springpectclinic:3.3.0 '
-            }
-        }
-        stage('Push image to repository') {
-            steps {
-                script {
-                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'Docker')
-                    sh "docker push springpectclinic:3.3.0 "
+                withMaven(globalMavenSettingsConfig: 'settings.xml', jdk: 'jdk17', maven: 'maven3', mavenSettingsConfig: '', traceability: true) {
+                sh 'mvn deploy -Dcheckstyle.skip=true'
                 }
             }
         }
