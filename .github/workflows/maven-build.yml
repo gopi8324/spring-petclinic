@@ -16,8 +16,11 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Remove Previous Dependencies
+        run: mvn clean
+
       - name: Install dependencies
-        run: mvn clean & install
+        run: mvn install
 
       - name: Package project
         run: mvn package
