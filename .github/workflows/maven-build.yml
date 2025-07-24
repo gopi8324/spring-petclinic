@@ -27,6 +27,6 @@ jobs:
              cp /home/runner/work/spring-petclinic/spring-petclinic/target/spring-petclinic-3.3.0-SNAPSHOT.jar springpetclinic.jar
         
       - name: Build docker image
-        run: docker image build -t spring .
+        run: docker image build -t spring-petclinic:1.0 .
 
 
